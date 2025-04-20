@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTD AI Assistant</title>
+    <style>
+        :root {
+            --utd-orange: #C75B12;
+            --utd-green: #154734;
+            --bg-color: #f8f9fa;
+            --chat-bg: #ffffff;
+            --user-msg: #e7f3fe;
+            --bot-msg: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .chat-interface {
+            background: var(--chat-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--utd-green);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+
+        .chat-box {
+            height: 500px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: var(--chat-bg);
+        }
+
+        .message {
+            max-width: 85%;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .user-message {
+            background: var(--user-msg);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            color: #2c5282;
+        }
+
+        .bot-message {
+            background: var(--bot-msg);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            color: #1a202c;
+        }
+
+        .input-area {
+            padding: 1.5rem;
+            background: var(--chat-bg);
+            border-top: 1px solid #edf2f7;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            max-width: 100%;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: var(--utd-orange);
+        }
+
+        button {
+            background: var(--utd-orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background: #a94a0e;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 0;
+                padding: 0;
+            }
+            .chat-interface {
+                border-radius: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .chat-box {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-interface">
+            <div class="header">
+                <h1>UTD AI Assistant</h1>
+                <p>Your guide to The University of Texas at Dallas</p>
+            </div>
+            <div class="chat-box" id="chat-box"></div>
+            <div class="input-area">
+                <div class="input-container">
+                    <input type="text" 
+                           id="message-input" 
+                           placeholder="Ask about admissions, programs, campus life..." 
+                           autocomplete="off"
+                           autofocus>
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            displayMessage(message, true);
+            input.value = '';
+
+            const formData = new FormData();
+            formData.append('message', message);
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                displayMessage(data.response, false);
+            } catch (error) {
+                console.error('Error occurred while sending message:', error);
+                displayMessage('Sorry, I encountered an error. Please try again.', false);
+            }
+        }
+
+        function displayMessage(text, isUser) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = isUser ? `You: ${text}` : `AI: ${text}`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initial greeting
+        window.onload = function() {
+            displayMessage("Hi! I'm your UTD AI Assistant. How can I help you today? Feel free to ask about academics, campus life, admissions, or anything else UTD-related!", false);
+        }
+    </script>
+</body>
+</html>
