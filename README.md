@@ -25,7 +25,7 @@ mkdir -p models
 curl -L https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q3_K_L.bin -o models/llama-2-7b-chat.ggmlv3.q3_K_L.bin
 ```
 
-4. Add UTD documents to `knowledge_base/university_docs/`
+4. Add university documents to `knowledge_base/university_docs/`
 
 5. Run the ingestion script:
 ```bash
